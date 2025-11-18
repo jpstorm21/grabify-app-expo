@@ -1,35 +1,41 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
+import { IconButton } from 'react-native-paper';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { authState } from '@/redux/auth/authSlice';
+import { useAppSelector } from '@/redux/store/hooks';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+    const { isAuthenticated } = useAppSelector(authState);
 
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+    if (!isAuthenticated) {
+        return <Redirect href="/login" />;
+    }
+
+    return (
+        <Tabs
+            screenOptions={{
+                headerShown: false,
+            }}
+        >
+            <Tabs.Screen
+                name="home"
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <IconButton icon="home" size={size} iconColor={color} />
+                    ),
+                    tabBarLabel: 'Inicio',
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <IconButton icon="account-hard-hat" size={size} iconColor={color} />
+                    ),
+                    tabBarLabel: 'Perfil',
+                }}
+            />
+        </Tabs>
+    );
 }

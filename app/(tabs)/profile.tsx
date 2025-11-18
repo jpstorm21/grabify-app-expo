@@ -1,0 +1,7 @@
+import React from 'react';
+
+import { ProfileScreen } from '@/screens';
+
+export default function Profile() {
+    return <ProfileScreen />;
+}
