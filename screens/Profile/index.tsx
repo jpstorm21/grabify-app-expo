@@ -1,16 +1,19 @@
-import { globalStyles } from '@/constants';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { View } from 'react-native';
-import { Button, Card, Text, useTheme } from 'react-native-paper';
+import { ScrollView, View } from 'react-native';
+import { Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './styles';
 
+import { globalStyles } from '@/constants';
 import { authState, logoutUser } from '@/redux/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/store/hooks';
+import { styles } from './styles';
 
 export const ProfileScreen: React.FC = () => {
     const theme = useTheme();
+    const router = useRouter();
     const dispatch = useAppDispatch();
+
     const { user, status } = useAppSelector(authState);
     const isLoading = status === 'loading';
 
@@ -18,46 +21,67 @@ export const ProfileScreen: React.FC = () => {
         await dispatch(logoutUser()).unwrap();
     };
 
+    const handleAccountInfo = () => {
+        router.push('/(tabs)/(stack)/account-info');
+    };
+
     return (
         <SafeAreaView style={globalStyles.container}>
-            <View style={styles.content}>
-                <Text
-                    variant="headlineMedium"
-                    style={[styles.title, { color: theme.colors.onSurface }]}
-                >
-                    Perfil
-                </Text>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <View style={styles.content}>
+                    <View style={styles.headerSection}>
+                        <Text
+                            variant="headlineMedium"
+                            style={[styles.title, { color: theme.colors.onSurface }]}
+                        >
+                            Mi cuenta
+                        </Text>
+                    </View>
 
-                {user && (
-                    <Card style={styles.userCard}>
-                        <Card.Content style={styles.userInfo}>
-                            <Text variant="titleLarge" style={styles.userName}>
-                                {user.name}
-                            </Text>
-                            <Text variant="bodyMedium" style={styles.userEmail}>
-                                {user.email}
-                            </Text>
-                            <Text variant="bodySmall" style={styles.userRut}>
-                                RUT: {user.rut}
-                            </Text>
-                        </Card.Content>
-                    </Card>
-                )}
+                    {user && (
+                        <>
+                            <View style={styles.profileSection}>
+                                <View style={styles.avatarContainer}>
+                                    {/* Avatar vacío por ahora */}
+                                </View>
+                                <Text
+                                    variant="headlineSmall"
+                                    style={[styles.userName, { color: theme.colors.onSurface }]}
+                                >
+                                    {user.name}
+                                </Text>
 
-                <View style={styles.logoutSection}>
-                    <Button
-                        mode="contained"
-                        onPress={handleLogout}
-                        loading={isLoading}
-                        disabled={isLoading}
-                        style={styles.logoutButton}
-                        contentStyle={styles.buttonContent}
-                        icon="logout"
-                    >
-                        Cerrar Sesión
-                    </Button>
+                                <Button
+                                    mode="elevated"
+                                    onPress={handleAccountInfo}
+                                    style={styles.accountInfoButton}
+                                    contentStyle={styles.accountInfoButtonContent}
+                                    icon="account"
+                                    buttonColor={theme.colors.primary}
+                                    textColor={theme.colors.background}
+                                >
+                                    Información de mi cuenta
+                                </Button>
+                            </View>
+                            <View style={styles.logoutSection}>
+                                <Button
+                                    mode="contained"
+                                    onPress={handleLogout}
+                                    loading={isLoading}
+                                    disabled={isLoading}
+                                    style={styles.logoutButton}
+                                    contentStyle={styles.buttonContent}
+                                    buttonColor={theme.colors.tertiary}
+                                    textColor="#fff"
+                                    icon="logout"
+                                >
+                                    Cerrar Sesión
+                                </Button>
+                            </View>
+                        </>
+                    )}
                 </View>
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 };

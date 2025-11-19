@@ -2,6 +2,7 @@ import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
 import { IconButton } from 'react-native-paper';
 
+import { globalColors } from '@/constants';
 import { authState } from '@/redux/auth/authSlice';
 import { useAppSelector } from '@/redux/store/hooks';
 
@@ -16,6 +17,8 @@ export default function TabLayout() {
         <Tabs
             screenOptions={{
                 headerShown: false,
+                tabBarActiveTintColor: globalColors.primary,
+                tabBarInactiveTintColor: globalColors.textSecondary,
             }}
         >
             <Tabs.Screen
@@ -34,6 +37,12 @@ export default function TabLayout() {
                         <IconButton icon="account-hard-hat" size={size} iconColor={color} />
                     ),
                     tabBarLabel: 'Perfil',
+                }}
+            />
+            <Tabs.Screen
+                name="(stack)"
+                options={{
+                    href: null,
                 }}
             />
         </Tabs>
