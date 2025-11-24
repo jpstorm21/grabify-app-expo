@@ -5,7 +5,7 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/constants';
 import { clearStorage, getItem, setItem } from '@/services/asyncStorage';
 
 const LOCAL_BASE_URL =
-    Platform.OS === 'android' ? 'http://192.168.1.81:4000/' : 'http://localhost:4000/';
+    Platform.OS === 'android' ? 'http://192.168.1.92:4000/' : 'http://192.168.1.92:4000/';
 
 export const clientBackend = axios.create({
     baseURL: `${LOCAL_BASE_URL}`,

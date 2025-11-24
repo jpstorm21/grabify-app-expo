@@ -70,11 +70,11 @@ export const LoginScreen: React.FC = () => {
                             <Card.Content style={styles.cardContent}>
                                 <View style={styles.brandRow}>
                                     <Image
-                                        source={require('../../assets/Logos/logo.png')}
+                                        source={require('../../assets/logo.png')}
                                         style={styles.logoTop}
                                     />
                                     <Image
-                                        source={require('../../assets/Logos/brand-logo.png')}
+                                        source={require('../../assets/brand-logo.png')}
                                         style={styles.wordmark}
                                     />
                                     <Text

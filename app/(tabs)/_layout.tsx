@@ -1,5 +1,6 @@
 import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
+import { Image } from 'react-native';
 import { IconButton } from 'react-native-paper';
 
 import { globalColors } from '@/constants';
@@ -16,9 +17,23 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                headerShown: false,
-                tabBarActiveTintColor: globalColors.primary,
+                headerShown: true,
+                headerTitle: () => (
+                    <Image
+                        source={require('../../assets/brand-logo.png')}
+                        style={{ width: 150, height: 80 }}
+                        resizeMode="contain"
+                    />
+                ),
+                headerStyle: {
+                    backgroundColor: globalColors.disabled,
+                },
+                headerTitleAlign: 'center',
+                tabBarActiveTintColor: globalColors.tertiary,
                 tabBarInactiveTintColor: globalColors.textSecondary,
+                tabBarStyle: {
+                    backgroundColor: globalColors.disabled,
+                },
             }}
         >
             <Tabs.Screen

@@ -3,47 +3,70 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     content: {
         flex: 1,
-        padding: 24,
-        justifyContent: 'center',
+        padding: 20,
+        paddingTop: 20,
     },
     headerSection: {
         alignItems: 'center',
-        position: 'absolute',
-        top: 20,
-        left: 0,
-        right: 0,
+        marginBottom: 32,
     },
-    appName: {
-        fontWeight: 'bold',
+    selectOptionText: {
         textAlign: 'center',
-        marginBottom: 12,
-    },
-    welcomeText: {
-        textAlign: 'center',
-        marginBottom: 8,
         fontWeight: '600',
+        letterSpacing: 0.5,
     },
-    motivationalText: {
-        textAlign: 'center',
-        opacity: 0.8,
-        fontStyle: 'italic',
-    },
-    actionsSection: {
-        gap: 16,
+    cardsContainer: {
+        gap: 20,
         width: '100%',
     },
-    actionButton: {
-        borderRadius: 12,
-        elevation: 4,
+    optionCard: {
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 8,
+        elevation: 3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
     },
-    secondaryButton: {
-        backgroundColor: '#3ecadd',
+    optionCardPressed: {
+        opacity: 0.8,
+        transform: [{ scale: 0.98 }],
     },
-    buttonContent: {
-        paddingVertical: 12,
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    iconContainer: {
+        borderRadius: 12,
+        marginRight: 16,
+        width: 64,
+        height: 64,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cardIcon: {
+        margin: 0,
+    },
+    cardTitle: {
+        flex: 1,
+        fontWeight: '700',
+        letterSpacing: 0.3,
+    },
+    cardDescription: {
+        marginBottom: 16,
+        lineHeight: 22,
+        letterSpacing: 0.2,
+    },
+    cardFooter: {
+        alignItems: 'flex-end',
+        marginTop: 8,
+    },
+    cardActionText: {
+        fontWeight: '600',
+        letterSpacing: 0.5,
     },
 });

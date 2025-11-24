@@ -8,9 +8,9 @@ export default function StackLayout() {
                 headerShown: false,
             }}
         >
-            <Stack.Screen name="purchase-load" options={{ headerShown: false }} />
-            <Stack.Screen name="stock-movement" options={{ headerShown: false }} />
-            <Stack.Screen name="account-info" options={{ headerShown: false }} />
+            <Stack.Screen name="purchase-load" />
+            <Stack.Screen name="stock-movement" />
+            <Stack.Screen name="account-info" />
         </Stack>
     );
 }

@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
@@ -13,7 +12,6 @@ import { styles } from './styles';
 
 export const AccountInfoScreen: React.FC = () => {
     const theme = useTheme();
-    const router = useRouter();
 
     const { user } = useAppSelector(authState);
 
@@ -63,14 +61,6 @@ export const AccountInfoScreen: React.FC = () => {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.content}>
                         <View style={styles.header}>
-                            <Button
-                                mode="text"
-                                onPress={() => router.back()}
-                                icon="arrow-left"
-                                style={styles.backButton}
-                            >
-                                Volver
-                            </Button>
                             <Text
                                 variant="headlineMedium"
                                 style={[styles.title, { color: theme.colors.onSurface }]}
