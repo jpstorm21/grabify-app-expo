@@ -82,6 +82,7 @@ export const authSlice = createSlice({
                 state.message = null;
             })
             .addCase(loginUser.fulfilled, (state, { payload }) => {
+                console.log(payload.data);
                 state.status = 'succeeded';
                 state.isAuthenticated = true;
                 state.message = payload.message;
@@ -94,6 +95,12 @@ export const authSlice = createSlice({
                     type: payload.data.type,
                     createdAt: payload.data.createdAt,
                     contactPhone: payload.data.contactPhone,
+                    vehicles: payload.data.vehicles,
+                    photos:
+                        payload.data.photosPaths.length > 0
+                            ? payload.data.photosPaths[0].path
+                            : null,
+                    warehouses: payload.data.warehouses,
                 };
             })
             .addCase(loginUser.rejected, (state, { error }) => {
@@ -120,6 +127,12 @@ export const authSlice = createSlice({
                     type: payload.data.type,
                     createdAt: payload.data.createdAt,
                     contactPhone: payload.data.contactPhone,
+                    vehicles: payload.data.vehicles,
+                    photos:
+                        payload.data.photosPaths.length > 0
+                            ? payload.data.photosPaths[0].path
+                            : null,
+                    warehouses: payload.data.warehouses,
                 };
             })
             .addCase(fecthCheckSession.rejected, (state) => {

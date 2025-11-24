@@ -14,6 +14,9 @@ interface LoginResponse {
     type: string;
     createdAt: string;
     contactPhone: string;
+    vehicles: Vehicle[];
+    photosPaths: { path: string }[];
+    warehouses: Warehouse[];
 }
 
 interface User {
@@ -24,4 +27,7 @@ interface User {
     type: string;
     createdAt: string;
     contactPhone: string;
+    vehicles: Vehicle[];
+    warehouses: Warehouse[];
+    photos: string | null;
 }

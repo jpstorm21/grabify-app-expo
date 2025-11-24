@@ -31,7 +31,7 @@ export const globalColors = {
 export const globalStyles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        paddingHorizontal: 20,
         backgroundColor: globalColors.background,
     },
     primaryButton: {
