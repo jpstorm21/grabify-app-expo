@@ -6,7 +6,7 @@ import type { RootState } from '../store';
 
 export const fecthWarehousesThunk = createAsyncThunk(
     'warehouse/getWarehouses',
-    async (_: WarehouseType) => {
+    async (_: WarehouseType[]) => {
         return await getWarehouses();
     },
 );
@@ -48,7 +48,7 @@ export const warehouseSlice = createSlice({
                 state.message = payload.message;
                 state.data = payload.data;
                 state.options = payload.data
-                    .filter((warehouse: Warehouse) => warehouse.kind === meta.arg)
+                    .filter((warehouse: Warehouse) => meta.arg.includes(warehouse.kind))
                     .map((warehouse: Warehouse) => {
                         return {
                             id: +warehouse.id,

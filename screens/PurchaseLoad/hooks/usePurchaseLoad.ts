@@ -44,7 +44,7 @@ export const usePurchaseLoad = () => {
 
     useEffect(() => {
         (async () => {
-            await dispatch(fecthWarehousesThunk(WAREHOUSE_TYPE.WAREHOUSE));
+            await dispatch(fecthWarehousesThunk([WAREHOUSE_TYPE.WAREHOUSE]));
             await dispatch(fecthProducts());
         })();
     }, [dispatch]);

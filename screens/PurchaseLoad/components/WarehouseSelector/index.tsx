@@ -18,6 +18,7 @@ interface WarehouseSelectorProps {
     onClear: () => void;
     showDropdown: boolean;
     filteredWarehouses: Warehouse[];
+    label?: string;
 }
 
 export const WarehouseSelector: React.FC<WarehouseSelectorProps> = ({
@@ -29,13 +30,14 @@ export const WarehouseSelector: React.FC<WarehouseSelectorProps> = ({
     onClear,
     showDropdown,
     filteredWarehouses,
+    label = 'Selección Bodega',
 }) => {
     const theme = useTheme();
 
     return (
         <View style={styles.container}>
             <TextInput
-                label="Selección Bodega"
+                label={label}
                 value={value}
                 onChangeText={onChangeText}
                 onFocus={onFocus}

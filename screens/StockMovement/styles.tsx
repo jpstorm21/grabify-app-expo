@@ -1,25 +1,15 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-    header: {
-        padding: 16,
-    },
-    backButton: {
-        alignSelf: 'flex-start',
-    },
-    content: {
+    scrollView: {
         flex: 1,
-        padding: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
-    title: {
-        marginBottom: 16,
-        fontWeight: '700',
-        textAlign: 'center',
+    scrollContent: {
+        padding: 16,
+        paddingBottom: 32,
     },
-    subtitle: {
-        textAlign: 'center',
-        opacity: 0.7,
+    confirmButton: {
+        marginTop: 24,
+        paddingVertical: 8,
     },
 });

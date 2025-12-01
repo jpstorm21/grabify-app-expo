@@ -18,6 +18,7 @@ interface ProductConfirmModalProps {
     onNetPriceChange: (price: string) => void;
     onConfirm: () => void;
     onCancel: () => void;
+    showNetPrice?: boolean;
 }
 
 export const ProductConfirmModal: React.FC<ProductConfirmModalProps> = ({
@@ -29,6 +30,7 @@ export const ProductConfirmModal: React.FC<ProductConfirmModalProps> = ({
     onNetPriceChange,
     onConfirm,
     onCancel,
+    showNetPrice = true,
 }) => {
     const theme = useTheme();
 
@@ -59,14 +61,16 @@ export const ProductConfirmModal: React.FC<ProductConfirmModalProps> = ({
                             mode="outlined"
                             style={styles.input}
                         />
-                        <TextInput
-                            label="Precio Neto"
-                            value={netPrice}
-                            onChangeText={onNetPriceChange}
-                            keyboardType="decimal-pad"
-                            mode="outlined"
-                            style={styles.input}
-                        />
+                        {showNetPrice && (
+                            <TextInput
+                                label="Precio Neto"
+                                value={netPrice}
+                                onChangeText={onNetPriceChange}
+                                keyboardType="decimal-pad"
+                                mode="outlined"
+                                style={styles.input}
+                            />
+                        )}
                         <View style={styles.buttons}>
                             <Button mode="outlined" onPress={onCancel} style={styles.buttonCancel}>
                                 Cancelar

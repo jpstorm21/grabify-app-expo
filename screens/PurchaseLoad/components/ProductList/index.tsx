@@ -51,7 +51,8 @@ export const ProductList: React.FC<ProductListProps> = ({
                 products.map((product) => (
                     <View key={product.id} style={styles.productItem}>
                         <Text variant="bodyLarge" style={styles.productName}>
-                            {product.name} - {formatCLP(Number(product.netPrice))}
+                            {product.name}
+                            {product.netPrice && ` - ${formatCLP(Number(product.netPrice))}`}
                         </Text>
                         <View style={styles.productControls}>
                             <IconButton

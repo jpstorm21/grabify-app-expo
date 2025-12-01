@@ -4,4 +4,5 @@ interface StockMovementPayload {
     destinationWarehouseId: number;
     author: string;
     date: string;
+    comment?: string;
 }
