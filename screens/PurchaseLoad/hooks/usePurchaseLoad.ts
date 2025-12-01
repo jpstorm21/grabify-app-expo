@@ -30,6 +30,7 @@ export const usePurchaseLoad = () => {
     const [warehouseInput, setWarehouseInput] = useState('');
     const [showWarehouseDropdown, setShowWarehouseDropdown] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [comment, setComment] = useState<string>('');
 
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
     const [showProductModal, setShowProductModal] = useState(false);
@@ -169,6 +170,7 @@ export const usePurchaseLoad = () => {
         clearWarehouse();
         setSelectedProducts([]);
         setSelectedDate(new Date());
+        setComment('');
         setShowProductConfirmModal(false);
         setPendingProduct(null);
         setPendingQuantity('1');
@@ -202,6 +204,7 @@ export const usePurchaseLoad = () => {
                         warehouseId: selectedWarehouse,
                         author: user?.name || '',
                         date: selectedDate.toISOString(),
+                        comment: comment,
                         products: selectedProducts.map((p) => ({
                             productId: +p.id,
                             quantity: p.quantity,
@@ -236,9 +239,11 @@ export const usePurchaseLoad = () => {
         filteredWarehouses,
         handleWarehouseSelect,
         clearWarehouse,
-        // Date
+        // Date and comment
         selectedDate,
         setSelectedDate,
+        comment,
+        setComment,
         // Products
         selectedProducts,
         filteredProducts,

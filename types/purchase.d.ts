@@ -3,4 +3,5 @@ interface PurchasePayload {
     warehouseId: number;
     author: string;
     date: string;
+    comment?: string;
 }

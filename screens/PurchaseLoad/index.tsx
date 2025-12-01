@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView } from 'react-native';
-import { Button, useTheme } from 'react-native-paper';
+import { Button, TextInput, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -33,9 +33,11 @@ export const PurchaseLoadScreen: React.FC = () => {
         filteredWarehouses,
         handleWarehouseSelect,
         clearWarehouse,
-        // Date
+        // Date and comment
         selectedDate,
         setSelectedDate,
+        comment,
+        setComment,
         // Products
         selectedProducts,
         filteredProducts,
@@ -115,6 +117,17 @@ export const PurchaseLoadScreen: React.FC = () => {
                     <DateSelector
                         value={selectedDate.toISOString()}
                         onDateChange={setSelectedDate}
+                    />
+                )}
+                {selectedWarehouse !== null && selectedDate && (
+                    <TextInput
+                        label="Comentario (opcional)"
+                        value={comment}
+                        onChangeText={setComment}
+                        mode="outlined"
+                        multiline
+                        numberOfLines={3}
+                        style={{ marginTop: 16 }}
                     />
                 )}
                 {selectedWarehouse !== null && selectedDate && (
