@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
+import { SelectedProduct } from '@/components/ProductList';
 import { notify } from '@/lib/toast';
 import { authState } from '@/redux/auth/authSlice';
 import { fecthProducts, productState } from '@/redux/product/productSlice';
@@ -9,7 +10,6 @@ import { createPurchaseThunk, purchaseState } from '@/redux/purchase/purchaseSli
 import { useAppDispatch, useAppSelector } from '@/redux/store/hooks';
 import { fecthWarehousesThunk, warehouseState } from '@/redux/warehouse/warehouseSlice';
 import { WAREHOUSE_TYPE } from '@/utils/warehouse';
-import { SelectedProduct } from '../components/ProductList';
 
 export const usePurchaseLoad = () => {
     const dispatch = useAppDispatch();

@@ -3,14 +3,17 @@ import { ScrollView } from 'react-native';
 import { Button, TextInput, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { DateSelector, Loading } from '@/components';
+import {
+    BarcodeScannerModal,
+    DateSelector,
+    Loading,
+    ProductConfirmModal,
+    ProductList,
+    ProductSearchModal,
+    WarehouseSelector,
+} from '@/components';
 import { globalStyles } from '@/constants';
 
-import { BarcodeScannerModal } from '../PurchaseLoad/components/BarcodeScannerModal';
-import { ProductConfirmModal } from '../PurchaseLoad/components/ProductConfirmModal';
-import { ProductList } from '../PurchaseLoad/components/ProductList';
-import { ProductSearchModal } from '../PurchaseLoad/components/ProductSearchModal';
-import { WarehouseSelector } from '../PurchaseLoad/components/WarehouseSelector';
 import { useStockMovement } from './hooks/useStockMovement';
 import { styles } from './styles';
 
