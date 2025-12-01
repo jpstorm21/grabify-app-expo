@@ -71,6 +71,14 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose 
                 }}
                 onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
             />
+            <View style={styles.overlay}>
+                <View style={styles.scanArea}>
+                    <View style={[styles.scanCorner, styles.topLeft]} />
+                    <View style={[styles.scanCorner, styles.topRight]} />
+                    <View style={[styles.scanCorner, styles.bottomLeft]} />
+                    <View style={[styles.scanCorner, styles.bottomRight]} />
+                </View>
+            </View>
             <View style={styles.bottomPanel}>
                 <Text style={styles.instructions}>Apunta la cámara hacia el código de barras.</Text>
                 {lastCode && (
