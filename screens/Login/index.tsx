@@ -38,7 +38,7 @@ export const LoginScreen: React.FC = () => {
                 .required('Contraseña es requerida'),
         }),
         onSubmit: async ({ rut, password }) => {
-            const promise = dispatch(loginUser({ rut, password, userType: 'admin' })).unwrap();
+            const promise = dispatch(loginUser({ rut, password })).unwrap();
             await notify.promise(
                 promise,
                 {

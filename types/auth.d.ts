@@ -1,7 +1,6 @@
 interface LoginFormValues {
     rut: string;
     password: string;
-    userType: string;
 }
 
 interface LoginResponse {
@@ -14,9 +13,9 @@ interface LoginResponse {
     type: string;
     createdAt: string;
     contactPhone: string;
-    vehicles: Vehicle[];
+    vehicle: Vehicle | null;
     photosPaths: { path: string }[];
-    warehouses: Warehouse[];
+    warehouse: Warehouse[];
 }
 
 interface User {
@@ -27,7 +26,7 @@ interface User {
     type: string;
     createdAt: string;
     contactPhone: string;
-    vehicles: Vehicle[];
-    warehouses: Warehouse[];
-    photos: string | null;
+    vehicle: Vehicle | null;
+    photosPaths: { path: string }[];
+    warehouse: Warehouse[];
 }

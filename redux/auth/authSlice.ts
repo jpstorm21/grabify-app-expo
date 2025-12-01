@@ -11,7 +11,6 @@ export const loginUser = createAsyncThunk(
             const response = await login({
                 rut: userData.rut,
                 password: userData.password,
-                userType: userData.userType,
             });
 
             setItem(ACCESS_TOKEN, response.data.accessToken);
@@ -82,7 +81,6 @@ export const authSlice = createSlice({
                 state.message = null;
             })
             .addCase(loginUser.fulfilled, (state, { payload }) => {
-                console.log(payload.data);
                 state.status = 'succeeded';
                 state.isAuthenticated = true;
                 state.message = payload.message;
@@ -95,12 +93,9 @@ export const authSlice = createSlice({
                     type: payload.data.type,
                     createdAt: payload.data.createdAt,
                     contactPhone: payload.data.contactPhone,
-                    vehicles: payload.data.vehicles,
-                    photos:
-                        payload.data.photosPaths.length > 0
-                            ? payload.data.photosPaths[0].path
-                            : null,
-                    warehouses: payload.data.warehouses,
+                    vehicle: payload.data.vehicle,
+                    photosPaths: payload.data.photosPaths || [],
+                    warehouse: payload.data.warehouse || null,
                 };
             })
             .addCase(loginUser.rejected, (state, { error }) => {
@@ -127,12 +122,9 @@ export const authSlice = createSlice({
                     type: payload.data.type,
                     createdAt: payload.data.createdAt,
                     contactPhone: payload.data.contactPhone,
-                    vehicles: payload.data.vehicles,
-                    photos:
-                        payload.data.photosPaths.length > 0
-                            ? payload.data.photosPaths[0].path
-                            : null,
-                    warehouses: payload.data.warehouses,
+                    vehicle: payload.data.vehicle,
+                    photosPaths: payload.data.photosPaths || [],
+                    warehouse: payload.data.warehouse || null,
                 };
             })
             .addCase(fecthCheckSession.rejected, (state) => {

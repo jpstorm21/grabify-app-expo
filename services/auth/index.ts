@@ -4,7 +4,6 @@ export const login = async (payload: LoginFormValues): Promise<ApiResponse<Login
     const requestData = {
         rut: payload.rut,
         password: payload.password,
-        userType: 'admin',
     };
 
     return await clientBackend.post('/auth/login', requestData);
