@@ -4,10 +4,10 @@ interface Warehouse {
     kind: WarehouseType;
     description: string;
     createdAt: string;
-    // warehouseProduct: WarehouseProduct[];
+    warehouseProduct: WarehouseProduct[];
 }
 
-// interface WarehouseProduct {
-//     warehouse: string;
-//     product: Product;
-// }
+interface WarehouseOptions {
+    id: number;
+    name: string;
+}

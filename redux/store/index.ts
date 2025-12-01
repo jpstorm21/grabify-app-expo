@@ -1,9 +1,15 @@
-import { Action, combineReducers, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import { uiReducer } from '..';
-import { authReducer } from '../auth/authSlice';
+import { Action, combineReducers, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
+
+import {
+    authReducer,
+    productReducer,
+    purchaseReducer,
+    stockMovementReducer,
+    uiReducer,
+    warehouseReducer,
+} from '..';
 
 const persistConfig = {
     key: 'root',
@@ -14,6 +20,10 @@ const persistConfig = {
 const rootReducer = combineReducers({
     ui: uiReducer,
     auth: authReducer,
+    product: productReducer,
+    warehouse: warehouseReducer,
+    purchase: purchaseReducer,
+    stockMovement: stockMovementReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
