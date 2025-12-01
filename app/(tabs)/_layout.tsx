@@ -21,7 +21,7 @@ export default function TabLayout() {
                 headerTitle: () => (
                     <Image
                         source={require('../../assets/brand-logo.png')}
-                        style={{ width: 150, height: 80 }}
+                        style={{ width: 150, height: 80, maxWidth: 150, maxHeight: 80 }}
                         resizeMode="contain"
                     />
                 ),
@@ -29,6 +29,10 @@ export default function TabLayout() {
                     backgroundColor: globalColors.disabled,
                 },
                 headerTitleAlign: 'center',
+                headerTitleContainerStyle: {
+                    left: 0,
+                    right: 0,
+                },
                 tabBarActiveTintColor: globalColors.tertiary,
                 tabBarInactiveTintColor: globalColors.textSecondary,
                 tabBarStyle: {
@@ -58,6 +62,7 @@ export default function TabLayout() {
                 name="(stack)"
                 options={{
                     href: null,
+                    headerShown: false,
                 }}
             />
         </Tabs>

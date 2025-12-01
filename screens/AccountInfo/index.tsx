@@ -6,14 +6,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Yup from 'yup';
 
 import { globalStyles } from '@/constants';
-import { authState } from '@/redux/auth/authSlice';
-import { useAppSelector } from '@/redux/store/hooks';
+import { notify } from '@/lib/toast';
+import { authState, clearError, clearMessage, clearStatus, editUser } from '@/redux/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/store/hooks';
 import { styles } from './styles';
 
 export const AccountInfoScreen: React.FC = () => {
+    const dispatch = useAppDispatch();
     const theme = useTheme();
 
-    const { user } = useAppSelector(authState);
+    const { user, status } = useAppSelector(authState);
+    const isLoading = status === 'loading';
 
     const [isEditing, setIsEditing] = useState(false);
 
@@ -37,9 +40,37 @@ export const AccountInfoScreen: React.FC = () => {
         },
         validationSchema,
         enableReinitialize: true,
-        onSubmit: (values) => {
-            console.log('Datos del formulario:', values);
-            setIsEditing(false);
+        onSubmit: async (values) => {
+            if (!user?.id) return;
+
+            const promise = dispatch(
+                editUser({
+                    id: user?.id,
+                    rut: user?.rut,
+                    name: values.name,
+                    email: values.email,
+                    contactPhone: values.contactPhone,
+                    ...(user?.type === 'employee' && { level: user?.level || '' }),
+                }),
+            ).unwrap();
+
+            await notify.promise(
+                promise,
+                {
+                    pending: 'Guardando cambios…',
+                    success: 'Cambios guardados correctamente',
+                    error: 'No pudimos guardar los cambios',
+                },
+                {
+                    position: 'bottom',
+                    onClose: () => {
+                        dispatch(clearError());
+                        dispatch(clearMessage());
+                        dispatch(clearStatus());
+                        setIsEditing(false);
+                    },
+                },
+            );
         },
     });
 
@@ -68,7 +99,6 @@ export const AccountInfoScreen: React.FC = () => {
                                 Información de mi cuenta
                             </Text>
                         </View>
-
                         <View style={styles.formContainer}>
                             <TextInput
                                 label="RUT"
@@ -85,7 +115,7 @@ export const AccountInfoScreen: React.FC = () => {
                                 onChangeText={formik.handleChange('name')}
                                 onBlur={() => formik.handleBlur('name')}
                                 editable={isEditing}
-                                disabled={!isEditing}
+                                disabled={!isEditing || isLoading}
                                 mode="outlined"
                                 left={<TextInput.Icon icon="account" />}
                                 style={styles.input}
@@ -102,7 +132,7 @@ export const AccountInfoScreen: React.FC = () => {
                                 onChangeText={formik.handleChange('email')}
                                 onBlur={() => formik.handleBlur('email')}
                                 editable={isEditing}
-                                disabled={!isEditing}
+                                disabled={!isEditing || isLoading}
                                 mode="outlined"
                                 autoCapitalize="none"
                                 keyboardType="email-address"
@@ -121,7 +151,7 @@ export const AccountInfoScreen: React.FC = () => {
                                 onChangeText={formik.handleChange('contactPhone')}
                                 onBlur={() => formik.handleBlur('contactPhone')}
                                 editable={isEditing}
-                                disabled={!isEditing}
+                                disabled={!isEditing || isLoading}
                                 mode="outlined"
                                 keyboardType="phone-pad"
                                 left={<TextInput.Icon icon="phone" />}
@@ -162,7 +192,7 @@ export const AccountInfoScreen: React.FC = () => {
                                         <Button
                                             mode="contained"
                                             onPress={() => formik.handleSubmit()}
-                                            disabled={!formik.isValid || !formik.dirty}
+                                            disabled={!formik.isValid || !formik.dirty || isLoading}
                                             style={styles.saveButton}
                                             contentStyle={styles.buttonContent}
                                             icon="content-save"

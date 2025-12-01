@@ -5,11 +5,16 @@ import { IconButton, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { globalColors, globalStyles } from '@/constants';
+import { authState } from '@/redux/auth/authSlice';
+import { useAppSelector } from '@/redux/store/hooks';
 import { styles } from './styles';
 
 export const HomeScreen: React.FC = () => {
     const router = useRouter();
     const theme = useTheme();
+
+    const { user } = useAppSelector(authState);
+    const isAdmin = user?.type === 'admin';
 
     return (
         <SafeAreaView style={globalStyles.container}>
@@ -23,51 +28,56 @@ export const HomeScreen: React.FC = () => {
                     </Text>
                 </View>
                 <View style={styles.cardsContainer}>
-                    <Pressable
-                        onPress={() => router.push('/(tabs)/(stack)/purchase-load')}
-                        style={({ pressed }) => [
-                            styles.optionCard,
-                            { backgroundColor: theme.colors.surface },
-                            pressed && styles.optionCardPressed,
-                        ]}
-                    >
-                        <View style={styles.cardHeader}>
-                            <View
-                                style={[
-                                    styles.iconContainer,
-                                    { backgroundColor: globalColors.primary + '20' },
-                                ]}
-                            >
-                                <IconButton
-                                    icon="cart-plus"
-                                    size={32}
-                                    iconColor={globalColors.primary}
-                                    style={styles.cardIcon}
-                                />
+                    {isAdmin && (
+                        <Pressable
+                            onPress={() => router.push('/(tabs)/(stack)/purchase-load')}
+                            style={({ pressed }) => [
+                                styles.optionCard,
+                                { backgroundColor: theme.colors.surface },
+                                pressed && styles.optionCardPressed,
+                            ]}
+                        >
+                            <View style={styles.cardHeader}>
+                                <View
+                                    style={[
+                                        styles.iconContainer,
+                                        { backgroundColor: globalColors.primary + '20' },
+                                    ]}
+                                >
+                                    <IconButton
+                                        icon="cart-plus"
+                                        size={32}
+                                        iconColor={globalColors.primary}
+                                        style={styles.cardIcon}
+                                    />
+                                </View>
+                                <Text
+                                    variant="titleLarge"
+                                    style={[styles.cardTitle, { color: globalColors.text }]}
+                                >
+                                    Carga de Compra
+                                </Text>
                             </View>
                             <Text
-                                variant="titleLarge"
-                                style={[styles.cardTitle, { color: globalColors.text }]}
+                                variant="bodyMedium"
+                                style={[
+                                    styles.cardDescription,
+                                    { color: globalColors.textSecondary },
+                                ]}
                             >
-                                Carga de Compra
+                                Genera un movimiento de stock a una bodega en base a lo que se
+                                compró de proveedores
                             </Text>
-                        </View>
-                        <Text
-                            variant="bodyMedium"
-                            style={[styles.cardDescription, { color: globalColors.textSecondary }]}
-                        >
-                            Genera un movimiento de stock a una bodega en base a lo que se compró de
-                            proveedores
-                        </Text>
-                        <View style={styles.cardFooter}>
-                            <Text
-                                variant="labelMedium"
-                                style={[styles.cardActionText, { color: globalColors.primary }]}
-                            >
-                                Iniciar →
-                            </Text>
-                        </View>
-                    </Pressable>
+                            <View style={styles.cardFooter}>
+                                <Text
+                                    variant="labelMedium"
+                                    style={[styles.cardActionText, { color: globalColors.primary }]}
+                                >
+                                    Iniciar →
+                                </Text>
+                            </View>
+                        </Pressable>
+                    )}
                     <Pressable
                         onPress={() => router.push('/(tabs)/(stack)/stock-movement')}
                         style={({ pressed }) => [

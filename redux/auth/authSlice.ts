@@ -2,7 +2,7 @@ import { createAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/constants';
 import { RootState } from '@/redux/store';
-import { checkSession, clearStorage, login, setItem } from '@/services';
+import { checkSession, clearStorage, editAdmin, editEmployee, login, setItem } from '@/services';
 
 export const loginUser = createAsyncThunk(
     'auth/loginUser',
@@ -46,6 +46,18 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { reject
         return rejectWithValue(err);
     }
 });
+
+export const editUser = createAsyncThunk(
+    'auth/editUser',
+    async (payload: PayloadEditUser, { getState }) => {
+        const state = getState() as RootState;
+        if (state.auth.user?.type === 'admin') {
+            return await editAdmin(payload);
+        } else {
+            return await editEmployee(payload);
+        }
+    },
+);
 
 export interface AuthState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -96,6 +108,7 @@ export const authSlice = createSlice({
                     vehicle: payload.data.vehicle,
                     photosPaths: payload.data.photosPaths || [],
                     warehouse: payload.data.warehouse || null,
+                    level: payload.data.level || null,
                 };
             })
             .addCase(loginUser.rejected, (state, { error }) => {
@@ -125,12 +138,38 @@ export const authSlice = createSlice({
                     vehicle: payload.data.vehicle,
                     photosPaths: payload.data.photosPaths || [],
                     warehouse: payload.data.warehouse || null,
+                    level: payload.data.level || null,
                 };
             })
             .addCase(fecthCheckSession.rejected, (state) => {
                 state.status = 'failed';
                 state.isAuthenticated = false;
                 state.error = 'La sesión ha expirado';
+                state.message = null;
+            });
+        builder
+            .addCase(editUser.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+                state.message = null;
+            })
+            .addCase(
+                editUser.fulfilled,
+                (state, { payload }: { payload: ApiResponse<Admin | Employee> }) => {
+                    state.status = 'succeeded';
+                    if (state.user) {
+                        state.user = {
+                            ...state.user,
+                            name: payload.data.name,
+                            email: payload.data.email,
+                            contactPhone: payload.data.contactPhone,
+                        };
+                    }
+                },
+            )
+            .addCase(editUser.rejected, (state, { error }) => {
+                state.status = 'failed';
+                state.error = error.message as string;
                 state.message = null;
             });
         builder.addCase(logoutUser.fulfilled, (state) => {
