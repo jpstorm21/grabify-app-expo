@@ -1,11 +1,15 @@
-import { createAction, createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
+import { WarehouseType } from '@/utils/warehouse';
 import { getWarehouses } from '../../services';
 import type { RootState } from '../store';
 
-export const fecthWarehousesThunk = createAsyncThunk('warehouse/getWarehouses', async () => {
-    return await getWarehouses();
-});
+export const fecthWarehousesThunk = createAsyncThunk(
+    'warehouse/getWarehouses',
+    async (_: WarehouseType) => {
+        return await getWarehouses();
+    },
+);
 
 export interface WarehouseState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -38,19 +42,20 @@ export const warehouseSlice = createSlice({
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(
-                fecthWarehousesThunk.fulfilled,
-                (state, action: PayloadAction<ApiResponse<Warehouse[]>>) => {
-                    const { payload } = action;
-                    state.status = 'succeeded';
-                    state.message = payload.message;
-                    state.data = payload.data;
-                    state.options = payload.data.map((warehouse: Warehouse) => ({
-                        id: +warehouse.id,
-                        name: warehouse.name,
-                    }));
-                },
-            )
+            .addCase(fecthWarehousesThunk.fulfilled, (state, action) => {
+                const { payload, meta } = action;
+                state.status = 'succeeded';
+                state.message = payload.message;
+                state.data = payload.data;
+                state.options = payload.data
+                    .filter((warehouse: Warehouse) => warehouse.kind === meta.arg)
+                    .map((warehouse: Warehouse) => {
+                        return {
+                            id: +warehouse.id,
+                            name: warehouse.name,
+                        };
+                    });
+            })
             .addCase(fecthWarehousesThunk.rejected, (state, { error }) => {
                 state.error = error as Error;
                 state.status = 'failed';
