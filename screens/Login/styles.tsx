@@ -63,13 +63,11 @@ export const styles = StyleSheet.create({
         borderRadius: 16,
         backgroundColor: '#fff',
         padding: 8,
-        // sombra ligera
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.15,
         shadowRadius: 12,
         elevation: 8,
-        // elevar visualmente sin solapar
         marginTop: -50,
     },
     input: {

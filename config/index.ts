@@ -9,7 +9,7 @@ const LOCAL_BASE_URL =
 
 export const clientBackend = axios.create({
     baseURL: `${LOCAL_BASE_URL}`,
-    timeout: 10000,
+    timeout: 100000,
     headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache',
