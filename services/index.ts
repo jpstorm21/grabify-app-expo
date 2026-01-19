@@ -5,4 +5,5 @@ export { editEmployee } from './employee';
 export { getProductById, getProducts } from './product';
 export { createPurchase } from './purchase';
 export { createStockMovement } from './stockMovement';
+export { getSuppliers } from './supplier';
 export { getWarehouses } from './warehouse';

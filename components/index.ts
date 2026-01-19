@@ -5,5 +5,6 @@ export { Loading } from './Loading';
 export { ProductConfirmModal } from './ProductConfirmModal';
 export { ProductList } from './ProductList';
 export { ProductSearchModal } from './ProductSearchModal';
+export { SupplierSelector } from './SupplierSelector';
 export { ToastifyManager } from './ToastifyManager';
 export { WarehouseSelector } from './WarehouseSelector';

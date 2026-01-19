@@ -7,6 +7,7 @@ import {
     productReducer,
     purchaseReducer,
     stockMovementReducer,
+    supplierReducer,
     uiReducer,
     warehouseReducer,
 } from '..';
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
     warehouse: warehouseReducer,
     purchase: purchaseReducer,
     stockMovement: stockMovementReducer,
+    supplier: supplierReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

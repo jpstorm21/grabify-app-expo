@@ -10,6 +10,7 @@ import {
     ProductConfirmModal,
     ProductList,
     ProductSearchModal,
+    SupplierSelector,
     WarehouseSelector,
 } from '@/components';
 import { globalStyles } from '@/constants';
@@ -22,7 +23,7 @@ export const PurchaseLoadScreen: React.FC = () => {
     const {
         // Loading states
         isLoading,
-        isProductsLoading,
+        isSuppliersLoading,
         isPurchaseLoading,
         // Warehouse
         selectedWarehouse,
@@ -33,6 +34,15 @@ export const PurchaseLoadScreen: React.FC = () => {
         filteredWarehouses,
         handleWarehouseSelect,
         clearWarehouse,
+        // Supplier
+        selectedSupplier,
+        supplierInput,
+        setSupplierInput,
+        showSupplierDropdown,
+        setShowSupplierDropdown,
+        filteredSuppliers,
+        handleSupplierSelect,
+        clearSupplier,
         // Date and comment
         selectedDate,
         setSelectedDate,
@@ -72,6 +82,14 @@ export const PurchaseLoadScreen: React.FC = () => {
 
     const handleWarehouseBlur = () => {
         setTimeout(() => setShowWarehouseDropdown(false), 200);
+    };
+
+    const handleSupplierFocus = () => {
+        setShowSupplierDropdown(true);
+    };
+
+    const handleSupplierBlur = () => {
+        setTimeout(() => setShowSupplierDropdown(false), 200);
     };
 
     const handleProductSearchFocus = () => {
@@ -114,12 +132,27 @@ export const PurchaseLoadScreen: React.FC = () => {
                     filteredWarehouses={filteredWarehouses}
                 />
                 {selectedWarehouse !== null && (
+                    <SupplierSelector
+                        value={supplierInput}
+                        onChangeText={(text) => {
+                            setSupplierInput(text);
+                            setShowSupplierDropdown(true);
+                        }}
+                        onFocus={handleSupplierFocus}
+                        onBlur={handleSupplierBlur}
+                        onSelect={handleSupplierSelect}
+                        onClear={clearSupplier}
+                        showDropdown={showSupplierDropdown}
+                        filteredSuppliers={filteredSuppliers}
+                    />
+                )}
+                {selectedWarehouse !== null && selectedSupplier !== null && (
                     <DateSelector
                         value={selectedDate.toISOString()}
                         onDateChange={setSelectedDate}
                     />
                 )}
-                {selectedWarehouse !== null && selectedDate && (
+                {selectedWarehouse !== null && selectedSupplier !== null && selectedDate && (
                     <TextInput
                         label="Comentario (opcional)"
                         value={comment}
@@ -130,7 +163,7 @@ export const PurchaseLoadScreen: React.FC = () => {
                         style={{ marginTop: 16 }}
                     />
                 )}
-                {selectedWarehouse !== null && selectedDate && (
+                {selectedWarehouse !== null && selectedSupplier !== null && selectedDate && (
                     <ProductList
                         products={selectedProducts}
                         onUpdateQuantity={updateProductQuantity}
@@ -139,16 +172,18 @@ export const PurchaseLoadScreen: React.FC = () => {
                         onOpenScanner={() => setShowScanner(true)}
                     />
                 )}
-                {selectedWarehouse !== null && selectedProducts.length > 0 && (
-                    <Button
-                        mode="contained"
-                        onPress={handleConfirm}
-                        style={styles.confirmButton}
-                        buttonColor={theme.colors.primary}
-                    >
-                        Confirmar
-                    </Button>
-                )}
+                {selectedWarehouse !== null &&
+                    selectedSupplier !== null &&
+                    selectedProducts.length > 0 && (
+                        <Button
+                            mode="contained"
+                            onPress={handleConfirm}
+                            style={styles.confirmButton}
+                            buttonColor={theme.colors.primary}
+                        >
+                            Confirmar
+                        </Button>
+                    )}
             </ScrollView>
             <ProductSearchModal
                 visible={showProductModal}
@@ -176,7 +211,7 @@ export const PurchaseLoadScreen: React.FC = () => {
                 onConfirm={confirmAddProduct}
                 onCancel={cancelProductConfirm}
             />
-            {(isLoading || isProductsLoading || isPurchaseLoading) && <Loading />}
+            {(isLoading || isSuppliersLoading || isPurchaseLoading) && <Loading />}
         </SafeAreaView>
     );
 };

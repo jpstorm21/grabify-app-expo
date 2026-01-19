@@ -1,13 +1,13 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 
 import { SelectedProduct } from '@/components/ProductList';
 import { notify } from '@/lib/toast';
 import { authState } from '@/redux/auth/authSlice';
-import { fecthProducts, productState } from '@/redux/product/productSlice';
 import { createPurchaseThunk, purchaseState } from '@/redux/purchase/purchaseSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/store/hooks';
+import { fecthSuppliers, supplierState } from '@/redux/supplier/supplierSlice';
 import { fecthWarehousesThunk, warehouseState } from '@/redux/warehouse/warehouseSlice';
 import { WAREHOUSE_TYPE } from '@/utils/warehouse';
 
@@ -15,20 +15,23 @@ export const usePurchaseLoad = () => {
     const dispatch = useAppDispatch();
     const { status: warehousesStatus, options: warehousesOptions } = useAppSelector(warehouseState);
     const {
-        status: productsStatus,
-        options: productsOptions,
-        data: productsData,
-    } = useAppSelector(productState);
+        status: suppliersStatus,
+        options: suppliersOptions,
+        data: suppliersData,
+    } = useAppSelector(supplierState);
     const { user } = useAppSelector(authState);
     const { status: purchaseStatus } = useAppSelector(purchaseState);
 
     const isLoading = warehousesStatus === 'loading';
-    const isProductsLoading = productsStatus === 'loading';
+    const isSuppliersLoading = suppliersStatus === 'loading';
     const isPurchaseLoading = purchaseStatus === 'loading';
 
     const [selectedWarehouse, setSelectedWarehouse] = useState<number | null>(null);
     const [warehouseInput, setWarehouseInput] = useState('');
     const [showWarehouseDropdown, setShowWarehouseDropdown] = useState(false);
+    const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
+    const [supplierInput, setSupplierInput] = useState('');
+    const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [comment, setComment] = useState<string>('');
 
@@ -46,12 +49,36 @@ export const usePurchaseLoad = () => {
     useEffect(() => {
         (async () => {
             await dispatch(fecthWarehousesThunk([WAREHOUSE_TYPE.WAREHOUSE]));
-            await dispatch(fecthProducts());
+            await dispatch(fecthSuppliers());
         })();
     }, [dispatch]);
 
+    // Obtener productos del proveedor seleccionado
+    const supplierProducts = useMemo(() => {
+        if (!selectedSupplier) return [];
+        const supplier = suppliersData.find((s) => s.id === selectedSupplier);
+        if (!supplier) return [];
+        return supplier.supplierProduct.map((sp) => ({
+            id: sp.product.id,
+            name: sp.product.name,
+            shared: sp.product.shared,
+        }));
+    }, [selectedSupplier, suppliersData]);
+
+    // Crear opciones de productos para el selector
+    const productsOptions = useMemo(() => {
+        return supplierProducts.map((p) => ({
+            id: p.id,
+            name: p.name,
+        }));
+    }, [supplierProducts]);
+
     const filteredWarehouses = warehousesOptions.filter((warehouse) =>
         warehouse.name.toLowerCase().includes(warehouseInput.toLowerCase()),
+    );
+
+    const filteredSuppliers = suppliersOptions.filter((supplier) =>
+        supplier.name.toLowerCase().includes(supplierInput.toLowerCase()),
     );
 
     const filteredProducts = productsOptions.filter((product) =>
@@ -59,7 +86,7 @@ export const usePurchaseLoad = () => {
     );
 
     const findProductByBarcode = (barcode: string): ProductOptions | null => {
-        const product = productsData.find((p) => p.shared === barcode);
+        const product = supplierProducts.find((p) => p.shared === barcode);
         if (product) {
             return { id: product.id, name: product.name };
         }
@@ -154,9 +181,27 @@ export const usePurchaseLoad = () => {
         setSelectedWarehouse(warehouse.id);
         setWarehouseInput(warehouse.name);
         setShowWarehouseDropdown(false);
+        if (selectedSupplier) {
+            clearSupplier();
+        }
         if (selectedProducts.length > 0) {
             setSelectedProducts([]);
         }
+    };
+
+    const handleSupplierSelect = (supplier: { id: string; name: string }) => {
+        setSelectedSupplier(supplier.id);
+        setSupplierInput(supplier.name);
+        setShowSupplierDropdown(false);
+        if (selectedProducts.length > 0) {
+            setSelectedProducts([]);
+        }
+    };
+
+    const clearSupplier = () => {
+        setSelectedSupplier(null);
+        setSupplierInput('');
+        setSelectedProducts([]);
     };
 
     const clearWarehouse = () => {
@@ -164,10 +209,12 @@ export const usePurchaseLoad = () => {
         setWarehouseInput('');
         setSelectedProducts([]);
         setSelectedDate(new Date());
+        clearSupplier();
     };
 
     const clearAll = () => {
         clearWarehouse();
+        clearSupplier();
         setSelectedProducts([]);
         setSelectedDate(new Date());
         setComment('');
@@ -179,11 +226,17 @@ export const usePurchaseLoad = () => {
         setShowScanner(false);
         setShowProductDropdown(false);
         setShowWarehouseDropdown(false);
+        setShowSupplierDropdown(false);
     };
 
     const handleConfirm = () => {
         if (!selectedWarehouse) {
             Alert.alert('Error', 'Debes seleccionar una bodega');
+            return;
+        }
+
+        if (!selectedSupplier) {
+            Alert.alert('Error', 'Debes seleccionar un proveedor');
             return;
         }
 
@@ -228,7 +281,7 @@ export const usePurchaseLoad = () => {
     return {
         // Loading states
         isLoading,
-        isProductsLoading,
+        isSuppliersLoading,
         isPurchaseLoading,
         // Warehouse
         selectedWarehouse,
@@ -239,6 +292,15 @@ export const usePurchaseLoad = () => {
         filteredWarehouses,
         handleWarehouseSelect,
         clearWarehouse,
+        // Supplier
+        selectedSupplier,
+        supplierInput,
+        setSupplierInput,
+        showSupplierDropdown,
+        setShowSupplierDropdown,
+        filteredSuppliers,
+        handleSupplierSelect,
+        clearSupplier,
         // Date and comment
         selectedDate,
         setSelectedDate,

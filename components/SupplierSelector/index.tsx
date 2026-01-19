@@ -4,24 +4,24 @@ import { Button, TextInput, useTheme } from 'react-native-paper';
 
 import { styles } from './styles';
 
-interface Warehouse {
-    id: number;
+interface Supplier {
+    id: string;
     name: string;
 }
 
-interface WarehouseSelectorProps {
+interface SupplierSelectorProps {
     value: string;
     onChangeText: (text: string) => void;
     onFocus: () => void;
     onBlur: () => void;
-    onSelect: (warehouse: Warehouse) => void;
+    onSelect: (supplier: Supplier) => void;
     onClear: () => void;
     showDropdown: boolean;
-    filteredWarehouses: Warehouse[];
+    filteredSuppliers: Supplier[];
     label?: string;
 }
 
-export const WarehouseSelector: React.FC<WarehouseSelectorProps> = ({
+export const SupplierSelector: React.FC<SupplierSelectorProps> = ({
     value,
     onChangeText,
     onFocus,
@@ -29,8 +29,8 @@ export const WarehouseSelector: React.FC<WarehouseSelectorProps> = ({
     onSelect,
     onClear,
     showDropdown,
-    filteredWarehouses,
-    label = 'Selección Bodega',
+    filteredSuppliers,
+    label = 'Selección Proveedor',
 }) => {
     const theme = useTheme();
 
@@ -46,21 +46,21 @@ export const WarehouseSelector: React.FC<WarehouseSelectorProps> = ({
                 style={styles.input}
                 mode="outlined"
             />
-            {showDropdown && filteredWarehouses.length > 0 && (
+            {showDropdown && filteredSuppliers.length > 0 && (
                 <View style={styles.dropdown}>
                     <ScrollView
                         nestedScrollEnabled
                         keyboardShouldPersistTaps="handled"
                         style={styles.scrollView}
                     >
-                        {filteredWarehouses.map((warehouse) => (
+                        {filteredSuppliers.map((supplier) => (
                             <Button
-                                key={warehouse.id}
-                                onPress={() => onSelect(warehouse)}
+                                key={supplier.id}
+                                onPress={() => onSelect(supplier)}
                                 style={styles.dropdownItem}
                                 textColor={theme.colors.onSurface}
                             >
-                                {warehouse.name}
+                                {supplier.name}
                             </Button>
                         ))}
                     </ScrollView>
