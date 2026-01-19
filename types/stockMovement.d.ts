@@ -5,4 +5,6 @@ interface StockMovementPayload {
     author: string;
     date: string;
     comment?: string;
+    initTime: string;
+    finishTime: string;
 }

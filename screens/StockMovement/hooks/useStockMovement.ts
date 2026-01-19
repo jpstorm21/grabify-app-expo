@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 
 import { SelectedProduct } from '@/components/ProductList';
@@ -17,11 +17,7 @@ import { WAREHOUSE_TYPE } from '@/utils/warehouse';
 export const useStockMovement = () => {
     const dispatch = useAppDispatch();
     const { status: warehousesStatus, data: warehousesData } = useAppSelector(warehouseState);
-    const {
-        status: productsStatus,
-        options: productsOptions,
-        data: productsData,
-    } = useAppSelector(productState);
+    const { status: productsStatus, data: productsData } = useAppSelector(productState);
     const { user } = useAppSelector(authState);
     const { status: stockMovementStatus } = useAppSelector(stockMovementState);
 
@@ -52,6 +48,8 @@ export const useStockMovement = () => {
     const [pendingProduct, setPendingProduct] = useState<ProductOptions | null>(null);
     const [pendingQuantity, setPendingQuantity] = useState<string>('1');
 
+    const [initTime] = useState<string>(new Date().toISOString());
+
     useEffect(() => {
         (async () => {
             await dispatch(
@@ -64,6 +62,43 @@ export const useStockMovement = () => {
             await dispatch(fecthProducts());
         })();
     }, [dispatch]);
+
+    const destinationWarehouse = useMemo(() => {
+        if (!selectedDestinationWarehouse) return null;
+        return warehousesData.find((w) => +w.id === selectedDestinationWarehouse);
+    }, [selectedDestinationWarehouse, warehousesData]);
+
+    const isDestinationVending = destinationWarehouse?.kind === WAREHOUSE_TYPE.VENDING;
+
+    const getProductFromWarehouseProduct = (wp: any): Product => {
+        return wp.product || wp;
+    };
+
+    const availableProducts = useMemo(() => {
+        if (isDestinationVending && destinationWarehouse) {
+            return destinationWarehouse.warehouseProduct.map((wp) => {
+                const product = getProductFromWarehouseProduct(wp);
+                return {
+                    id: product.id,
+                    name: product.name,
+                    shared: product.shared,
+                };
+            });
+        } else {
+            return productsData.map((p) => ({
+                id: p.id,
+                name: p.name,
+                shared: p.shared,
+            }));
+        }
+    }, [isDestinationVending, destinationWarehouse, productsData]);
+
+    const productsOptions = useMemo(() => {
+        return availableProducts.map((p) => ({
+            id: p.id,
+            name: p.name,
+        }));
+    }, [availableProducts]);
 
     const filteredOriginWarehouses = warehousesData
         .filter((warehouse) => warehouse.kind !== WAREHOUSE_TYPE.VENDING)
@@ -89,7 +124,7 @@ export const useStockMovement = () => {
     );
 
     const findProductByBarcode = (barcode: string): ProductOptions | null => {
-        const product = productsData.find((p) => p.shared === barcode);
+        const product = availableProducts.find((p) => p.shared === barcode);
         if (product) {
             return { id: product.id, name: product.name };
         }
@@ -188,6 +223,9 @@ export const useStockMovement = () => {
         setSelectedDestinationWarehouse(warehouse.id);
         setDestinationWarehouseInput(warehouse.name);
         setShowDestinationWarehouseDropdown(false);
+        if (selectedProducts.length > 0) {
+            setSelectedProducts([]);
+        }
     };
 
     const clearDestinationWarehouse = () => {
@@ -226,6 +264,40 @@ export const useStockMovement = () => {
             return;
         }
 
+        if (isDestinationVending && destinationWarehouse) {
+            const requiredProductIds = destinationWarehouse.warehouseProduct.map((wp) => {
+                const product = getProductFromWarehouseProduct(wp);
+                return product.id;
+            });
+
+            const selectedProductIds = selectedProducts.map((p) => p.id);
+            const missingProducts = requiredProductIds.filter(
+                (requiredId) => !selectedProductIds.includes(requiredId),
+            );
+
+            if (missingProducts.length > 0) {
+                const missingProductNames = missingProducts
+                    .map((missingId) => {
+                        const wp = destinationWarehouse.warehouseProduct.find((wp) => {
+                            const product = getProductFromWarehouseProduct(wp);
+                            return product.id === missingId;
+                        });
+                        if (wp) {
+                            const product = getProductFromWarehouseProduct(wp);
+                            return product.name;
+                        }
+                        return '';
+                    })
+                    .filter((name) => name !== '');
+
+                Alert.alert(
+                    'Productos faltantes',
+                    `Debes agregar al menos 1 cantidad de cada producto requerido.\n\nProductos faltantes:\n${missingProductNames.join('\n')}`,
+                );
+                return;
+            }
+        }
+
         Alert.alert(
             'Confirmar movimiento',
             '¿Estás seguro de que deseas realizar este movimiento de stock?',
@@ -237,16 +309,20 @@ export const useStockMovement = () => {
                 {
                     text: 'Confirmar',
                     onPress: async () => {
+                        const finishTime = new Date().toISOString();
+
                         const stockMovementData: StockMovementPayload = {
                             originWarehouseId: selectedOriginWarehouse,
                             destinationWarehouseId: selectedDestinationWarehouse,
                             date: selectedDate.toISOString(),
-                            // comment: comment || undefined,
+                            comment: comment || undefined,
                             products: selectedProducts.map((p) => ({
                                 id: +p.id,
                                 quantity: p.quantity,
                             })),
                             author: user?.name || '',
+                            initTime: initTime,
+                            finishTime: finishTime,
                         };
 
                         const result = await dispatch(createStockMovementThunk(stockMovementData));
