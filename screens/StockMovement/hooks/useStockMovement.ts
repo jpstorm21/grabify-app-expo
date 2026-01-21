@@ -596,16 +596,16 @@ export const useStockMovement = () => {
                                     : [],
                         };
 
-                        console.log(stockMovementData);
-
                         const result = await dispatch(createStockMovementThunk(stockMovementData));
-                        console.log(result);
                         if (result.meta.requestStatus === 'fulfilled') {
                             notify.success('Movimiento de stock realizado correctamente');
                             clearAll();
                             router.push('/(tabs)/home');
                         } else {
-                            notify.error('Error al realizar el movimiento de stock');
+                            const error: any = result;
+                            notify.error(
+                                error.error.message || 'Error al realizar el movimiento de stock',
+                            );
                         }
                     },
                 },

@@ -1,6 +1,6 @@
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { Button, Card, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Yup from 'yup';
@@ -150,7 +150,9 @@ export const LoginScreen: React.FC = () => {
                                 <View style={styles.bottomRow}>
                                     <Button
                                         mode="text"
-                                        onPress={() => console.log('Forgot password')}
+                                        onPress={() =>
+                                            Alert.alert('Aun no se encuentra disponible')
+                                        }
                                         style={styles.forgotButton}
                                     >
                                         ¿Olvidaste tu contraseña?
