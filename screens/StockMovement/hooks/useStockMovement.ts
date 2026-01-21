@@ -14,6 +14,172 @@ import { useAppDispatch, useAppSelector } from '@/redux/store/hooks';
 import { fecthWarehousesThunk, warehouseState } from '@/redux/warehouse/warehouseSlice';
 import { WAREHOUSE_TYPE } from '@/utils/warehouse';
 
+type ProductInfo = { id: number; name: string; shared: string };
+
+const getProductFromWarehouseProduct = (wp: any): Product => {
+    return wp.product || wp;
+};
+
+const extractProductsFromWarehouse = (warehouse: Warehouse): ProductInfo[] => {
+    return warehouse.warehouseProduct.map((wp) => {
+        const product = getProductFromWarehouseProduct(wp);
+        return {
+            id: product.id,
+            name: product.name,
+            shared: product.shared,
+        };
+    });
+};
+
+const getProductsFromUserWarehouses = (
+    userWarehouses: Warehouse[],
+    warehousesData: Warehouse[],
+): ProductInfo[] => {
+    const allProducts = new Map<number, ProductInfo>();
+    userWarehouses.forEach((userWarehouse) => {
+        const warehouseData = warehousesData.find((w) => String(w.id) === String(userWarehouse.id));
+        if (warehouseData) {
+            warehouseData.warehouseProduct.forEach((wp) => {
+                const product = getProductFromWarehouseProduct(wp);
+                if (!allProducts.has(product.id)) {
+                    allProducts.set(product.id, {
+                        id: product.id,
+                        name: product.name,
+                        shared: product.shared,
+                    });
+                }
+            });
+        }
+    });
+    return Array.from(allProducts.values());
+};
+
+const getAdminAvailableProducts = (
+    destinationWarehouse: Warehouse | null,
+    isDestinationVending: boolean,
+    productsData: Product[],
+): ProductInfo[] => {
+    if (isDestinationVending && destinationWarehouse) {
+        return extractProductsFromWarehouse(destinationWarehouse);
+    }
+    return productsData.map((p) => ({
+        id: p.id,
+        name: p.name,
+        shared: p.shared,
+    }));
+};
+
+const getEmployeeAvailableProducts = (
+    originWarehouse: Warehouse | null,
+    destinationWarehouse: Warehouse | null,
+    isOriginVehicle: boolean,
+    isDestinationVehicle: boolean,
+    isDestinationVending: boolean,
+    userWarehouses: Warehouse[],
+    warehousesData: Warehouse[],
+): ProductInfo[] => {
+    if (isDestinationVending && destinationWarehouse) {
+        return extractProductsFromWarehouse(destinationWarehouse);
+    }
+
+    const isWarehouseToVehicle =
+        originWarehouse?.kind === WAREHOUSE_TYPE.WAREHOUSE && isDestinationVehicle;
+
+    if (isWarehouseToVehicle) {
+        return getProductsFromUserWarehouses(userWarehouses, warehousesData);
+    }
+
+    if (isOriginVehicle && destinationWarehouse) {
+        return extractProductsFromWarehouse(destinationWarehouse);
+    }
+
+    return getProductsFromUserWarehouses(userWarehouses, warehousesData);
+};
+
+const getAdminOriginWarehouses = (warehousesData: Warehouse[]): Warehouse[] => {
+    return warehousesData.filter((warehouse) => warehouse.kind !== WAREHOUSE_TYPE.VENDING);
+};
+
+const getEmployeeOriginWarehouses = (warehousesData: Warehouse[]): Warehouse[] => {
+    const bodegas = warehousesData.filter(
+        (warehouse) => warehouse.kind === WAREHOUSE_TYPE.WAREHOUSE,
+    );
+    const transport = warehousesData.filter(
+        (warehouse) => warehouse.kind === WAREHOUSE_TYPE.TRANSPORT,
+    );
+    return [...bodegas, ...transport];
+};
+
+const getAdminDestinationWarehouses = (warehousesData: Warehouse[]): Warehouse[] => {
+    return warehousesData;
+};
+
+const getEmployeeDestinationWarehouses = (
+    warehousesData: Warehouse[],
+    userWarehouses: Warehouse[],
+): Warehouse[] => {
+    const warehouseIds = userWarehouses.map((w) => String(w.id));
+    const userWarehousesList = warehousesData.filter((warehouse) =>
+        warehouseIds.includes(String(warehouse.id)),
+    );
+    const allTransport = warehousesData.filter(
+        (warehouse) => warehouse.kind === WAREHOUSE_TYPE.TRANSPORT,
+    );
+    return [...allTransport, ...userWarehousesList];
+};
+
+const getAdminRequiredProducts = (
+    destinationWarehouse: Warehouse | null,
+    isDestinationVending: boolean,
+): { id: number; name: string }[] => {
+    if (!isDestinationVending || !destinationWarehouse) {
+        return [];
+    }
+    return destinationWarehouse.warehouseProduct.map((wp) => {
+        const product = getProductFromWarehouseProduct(wp);
+        return { id: product.id, name: product.name };
+    });
+};
+
+const getEmployeeRequiredProducts = (
+    originWarehouse: Warehouse | null,
+    destinationWarehouse: Warehouse | null,
+    isOriginVehicle: boolean,
+    isDestinationVehicle: boolean,
+    userWarehouses: Warehouse[],
+    warehousesData: Warehouse[],
+): { id: number; name: string }[] => {
+    const isWarehouseToVehicle =
+        originWarehouse?.kind === WAREHOUSE_TYPE.WAREHOUSE && isDestinationVehicle;
+
+    if (isWarehouseToVehicle) {
+        const allRequiredProducts = new Map<number, string>();
+        userWarehouses.forEach((userWarehouse) => {
+            const warehouseData = warehousesData.find(
+                (w) => String(w.id) === String(userWarehouse.id),
+            );
+            if (warehouseData) {
+                warehouseData.warehouseProduct.forEach((wp) => {
+                    const product = getProductFromWarehouseProduct(wp);
+                    if (!allRequiredProducts.has(product.id)) {
+                        allRequiredProducts.set(product.id, product.name);
+                    }
+                });
+            }
+        });
+        return Array.from(allRequiredProducts.entries()).map(([id, name]) => ({ id, name }));
+    }
+
+    if (isOriginVehicle && destinationWarehouse) {
+        return destinationWarehouse.warehouseProduct.map((wp) => {
+            const product = getProductFromWarehouseProduct(wp);
+            return { id: product.id, name: product.name };
+        });
+    }
+
+    return [];
+};
+
 export const useStockMovement = () => {
     const dispatch = useAppDispatch();
     const { status: warehousesStatus, data: warehousesData } = useAppSelector(warehouseState);
@@ -49,6 +215,14 @@ export const useStockMovement = () => {
     const [pendingQuantity, setPendingQuantity] = useState<string>('1');
 
     const [initTime] = useState<string>(new Date().toISOString());
+    const [pendingFailedProducts, setPendingFailedProducts] = useState<{
+        products: { id: number; name: string }[];
+        comment: string;
+    } | null>(null);
+
+    const isAdmin = user?.type === 'admin';
+    const isEmployee = user?.type === 'employee';
+    const userWarehouses = useMemo(() => user?.warehouse || [], [user?.warehouse]);
 
     useEffect(() => {
         (async () => {
@@ -63,35 +237,58 @@ export const useStockMovement = () => {
         })();
     }, [dispatch]);
 
+    const originWarehouse = useMemo(() => {
+        if (!selectedOriginWarehouse) return null;
+        return warehousesData.find((w) => +w.id === selectedOriginWarehouse);
+    }, [selectedOriginWarehouse, warehousesData]);
+
     const destinationWarehouse = useMemo(() => {
         if (!selectedDestinationWarehouse) return null;
         return warehousesData.find((w) => +w.id === selectedDestinationWarehouse);
     }, [selectedDestinationWarehouse, warehousesData]);
 
     const isDestinationVending = destinationWarehouse?.kind === WAREHOUSE_TYPE.VENDING;
-
-    const getProductFromWarehouseProduct = (wp: any): Product => {
-        return wp.product || wp;
-    };
+    const isOriginVehicle = originWarehouse?.kind === WAREHOUSE_TYPE.TRANSPORT;
+    const isDestinationVehicle = destinationWarehouse?.kind === WAREHOUSE_TYPE.TRANSPORT;
 
     const availableProducts = useMemo(() => {
-        if (isDestinationVending && destinationWarehouse) {
-            return destinationWarehouse.warehouseProduct.map((wp) => {
-                const product = getProductFromWarehouseProduct(wp);
-                return {
-                    id: product.id,
-                    name: product.name,
-                    shared: product.shared,
-                };
-            });
-        } else {
-            return productsData.map((p) => ({
-                id: p.id,
-                name: p.name,
-                shared: p.shared,
-            }));
+        if (isAdmin) {
+            return getAdminAvailableProducts(
+                destinationWarehouse ?? null,
+                isDestinationVending,
+                productsData,
+            );
         }
-    }, [isDestinationVending, destinationWarehouse, productsData]);
+
+        if (isEmployee) {
+            return getEmployeeAvailableProducts(
+                originWarehouse ?? null,
+                destinationWarehouse ?? null,
+                isOriginVehicle,
+                isDestinationVehicle,
+                isDestinationVending,
+                userWarehouses,
+                warehousesData,
+            );
+        }
+
+        return productsData.map((p) => ({
+            id: p.id,
+            name: p.name,
+            shared: p.shared,
+        }));
+    }, [
+        isAdmin,
+        isEmployee,
+        destinationWarehouse,
+        isDestinationVending,
+        productsData,
+        originWarehouse,
+        isOriginVehicle,
+        isDestinationVehicle,
+        userWarehouses,
+        warehousesData,
+    ]);
 
     const productsOptions = useMemo(() => {
         return availableProducts.map((p) => ({
@@ -100,24 +297,35 @@ export const useStockMovement = () => {
         }));
     }, [availableProducts]);
 
-    const filteredOriginWarehouses = warehousesData
-        .filter((warehouse) => warehouse.kind !== WAREHOUSE_TYPE.VENDING)
-        .filter((warehouse) =>
-            warehouse.name.toLowerCase().includes(originWarehouseInput.toLowerCase()),
-        )
-        .map((warehouse) => ({
-            id: +warehouse.id,
-            name: warehouse.name,
-        }));
+    const filteredOriginWarehouses = useMemo(() => {
+        const availableWarehouses = isAdmin
+            ? getAdminOriginWarehouses(warehousesData)
+            : getEmployeeOriginWarehouses(warehousesData);
 
-    const filteredDestinationWarehouses = warehousesData
-        .filter((warehouse) =>
-            warehouse.name.toLowerCase().includes(destinationWarehouseInput.toLowerCase()),
-        )
-        .map((warehouse) => ({
-            id: +warehouse.id,
-            name: warehouse.name,
-        }));
+        return availableWarehouses
+            .filter((warehouse) =>
+                warehouse.name.toLowerCase().includes(originWarehouseInput.toLowerCase()),
+            )
+            .map((warehouse) => ({
+                id: +warehouse.id,
+                name: warehouse.name,
+            }));
+    }, [warehousesData, originWarehouseInput, isAdmin]);
+
+    const filteredDestinationWarehouses = useMemo(() => {
+        const availableWarehouses = isAdmin
+            ? getAdminDestinationWarehouses(warehousesData)
+            : getEmployeeDestinationWarehouses(warehousesData, userWarehouses);
+
+        return availableWarehouses
+            .filter((warehouse) =>
+                warehouse.name.toLowerCase().includes(destinationWarehouseInput.toLowerCase()),
+            )
+            .map((warehouse) => ({
+                id: +warehouse.id,
+                name: warehouse.name,
+            }));
+    }, [warehousesData, destinationWarehouseInput, isAdmin, userWarehouses]);
 
     const filteredProducts = productsOptions.filter((product) =>
         product.name.toLowerCase().includes(productSearchInput.toLowerCase()),
@@ -246,6 +454,26 @@ export const useStockMovement = () => {
         setShowScanner(false);
         setSelectedDate(new Date());
         setComment('');
+        setPendingFailedProducts(null);
+    };
+
+    const validateRequiredProducts = (): { id: number; name: string }[] => {
+        if (isAdmin) {
+            return getAdminRequiredProducts(destinationWarehouse ?? null, isDestinationVending);
+        }
+
+        if (isEmployee) {
+            return getEmployeeRequiredProducts(
+                originWarehouse ?? null,
+                destinationWarehouse ?? null,
+                isOriginVehicle,
+                isDestinationVehicle,
+                userWarehouses,
+                warehousesData,
+            );
+        }
+
+        return [];
     };
 
     const handleConfirm = () => {
@@ -264,38 +492,69 @@ export const useStockMovement = () => {
             return;
         }
 
-        if (isDestinationVending && destinationWarehouse) {
-            const requiredProductIds = destinationWarehouse.warehouseProduct.map((wp) => {
-                const product = getProductFromWarehouseProduct(wp);
-                return product.id;
-            });
+        if (pendingFailedProducts && comment.trim() !== '') {
+            confirmStockMovement(pendingFailedProducts.products, comment.trim());
+            setPendingFailedProducts(null);
+            return;
+        }
 
+        const requiredProductsInfo = validateRequiredProducts();
+
+        if (requiredProductsInfo.length > 0) {
             const selectedProductIds = selectedProducts.map((p) => p.id);
-            const missingProducts = requiredProductIds.filter(
-                (requiredId) => !selectedProductIds.includes(requiredId),
+            const missingProducts = requiredProductsInfo.filter(
+                (product) => !selectedProductIds.includes(product.id),
             );
 
             if (missingProducts.length > 0) {
-                const missingProductNames = missingProducts
-                    .map((missingId) => {
-                        const wp = destinationWarehouse.warehouseProduct.find((wp) => {
-                            const product = getProductFromWarehouseProduct(wp);
-                            return product.id === missingId;
-                        });
-                        if (wp) {
-                            const product = getProductFromWarehouseProduct(wp);
-                            return product.name;
-                        }
-                        return '';
-                    })
-                    .filter((name) => name !== '');
+                const missingProductNames = missingProducts.map((p) => p.name).join('\n');
 
                 Alert.alert(
                     'Productos faltantes',
-                    `Debes agregar al menos 1 cantidad de cada producto requerido.\n\nProductos faltantes:\n${missingProductNames.join('\n')}`,
+                    `Debes agregar al menos 1 cantidad de cada producto requerido.\n\nProductos faltantes:\n${missingProductNames}`,
+                    [
+                        {
+                            text: 'Cancelar',
+                            style: 'cancel',
+                        },
+                        {
+                            text: 'Continuar de todas formas',
+                            onPress: () => {
+                                setPendingFailedProducts({
+                                    products: missingProducts,
+                                    comment: '',
+                                });
+                                Alert.alert(
+                                    'Comentario requerido',
+                                    'Por favor, agrega un comentario en el campo "Comentario" explicando por qué continúas sin todos los productos requeridos, luego presiona "Confirmar" nuevamente.',
+                                    [
+                                        {
+                                            text: 'Entendido',
+                                            onPress: () => {},
+                                        },
+                                    ],
+                                );
+                            },
+                        },
+                    ],
                 );
                 return;
             }
+        }
+
+        confirmStockMovement([], '');
+    };
+
+    const confirmStockMovement = (
+        missingProducts: { id: number; name: string }[],
+        failedComment: string,
+    ) => {
+        if (missingProducts.length > 0 && !failedComment) {
+            Alert.alert(
+                'Comentario requerido',
+                'Debes agregar un comentario explicando por qué continúas sin todos los productos requeridos.',
+            );
+            return;
         }
 
         Alert.alert(
@@ -309,13 +568,17 @@ export const useStockMovement = () => {
                 {
                     text: 'Confirmar',
                     onPress: async () => {
+                        if (!selectedOriginWarehouse || !selectedDestinationWarehouse) {
+                            return;
+                        }
+
                         const finishTime = new Date().toISOString();
 
                         const stockMovementData: StockMovementPayload = {
                             originWarehouseId: selectedOriginWarehouse,
                             destinationWarehouseId: selectedDestinationWarehouse,
                             date: selectedDate.toISOString(),
-                            comment: comment || undefined,
+                            comment: comment || '',
                             products: selectedProducts.map((p) => ({
                                 id: +p.id,
                                 quantity: p.quantity,
@@ -323,9 +586,20 @@ export const useStockMovement = () => {
                             author: user?.name || '',
                             initTime: initTime,
                             finishTime: finishTime,
+                            productsFailed:
+                                missingProducts.length > 0 && failedComment
+                                    ? missingProducts.map((p) => ({
+                                          id: p.id,
+                                          quantity: 1,
+                                          comment: failedComment,
+                                      }))
+                                    : [],
                         };
 
+                        console.log(stockMovementData);
+
                         const result = await dispatch(createStockMovementThunk(stockMovementData));
+                        console.log(result);
                         if (result.meta.requestStatus === 'fulfilled') {
                             notify.success('Movimiento de stock realizado correctamente');
                             clearAll();
@@ -340,11 +614,9 @@ export const useStockMovement = () => {
     };
 
     return {
-        // Loading states
         isLoading,
         isProductsLoading,
         isStockMovementLoading,
-        // Origin Warehouse
         selectedOriginWarehouse,
         originWarehouseInput,
         setOriginWarehouseInput,
@@ -353,7 +625,6 @@ export const useStockMovement = () => {
         filteredOriginWarehouses,
         handleOriginWarehouseSelect,
         clearOriginWarehouse,
-        // Destination Warehouse
         selectedDestinationWarehouse,
         destinationWarehouseInput,
         setDestinationWarehouseInput,
@@ -362,19 +633,16 @@ export const useStockMovement = () => {
         filteredDestinationWarehouses,
         handleDestinationWarehouseSelect,
         clearDestinationWarehouse,
-        // Date and comment
         selectedDate,
         setSelectedDate,
         comment,
         setComment,
-        // Products
         selectedProducts,
         filteredProducts,
         productSearchInput,
         setProductSearchInput,
         showProductDropdown,
         setShowProductDropdown,
-        // Modals
         showProductModal,
         setShowProductModal,
         showScanner,
@@ -383,7 +651,6 @@ export const useStockMovement = () => {
         pendingProduct,
         pendingQuantity,
         setPendingQuantity,
-        // Actions
         openProductConfirmModal,
         confirmAddProduct,
         cancelProductConfirm,

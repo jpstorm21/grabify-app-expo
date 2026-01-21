@@ -7,4 +7,5 @@ interface StockMovementPayload {
     comment?: string;
     initTime: string;
     finishTime: string;
+    productsFailed?: { id: number; quantity: number; comment: string }[];
 }

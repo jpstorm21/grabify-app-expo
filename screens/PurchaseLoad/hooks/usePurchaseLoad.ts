@@ -251,7 +251,9 @@ export const usePurchaseLoad = () => {
             {
                 text: 'Confirmar',
                 onPress: async () => {
-                    const selectedSupplierData = suppliersData.find((s) => s.id === selectedSupplier);
+                    const selectedSupplierData = suppliersData.find(
+                        (s) => s.id === selectedSupplier,
+                    );
 
                     const purchaseData: PurchasePayload = {
                         warehouseId: selectedWarehouse,
