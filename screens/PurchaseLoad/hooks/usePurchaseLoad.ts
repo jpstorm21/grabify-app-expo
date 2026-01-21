@@ -53,7 +53,6 @@ export const usePurchaseLoad = () => {
         })();
     }, [dispatch]);
 
-    // Obtener productos del proveedor seleccionado
     const supplierProducts = useMemo(() => {
         if (!selectedSupplier) return [];
         const supplier = suppliersData.find((s) => s.id === selectedSupplier);
@@ -65,7 +64,6 @@ export const usePurchaseLoad = () => {
         }));
     }, [selectedSupplier, suppliersData]);
 
-    // Crear opciones de productos para el selector
     const productsOptions = useMemo(() => {
         return supplierProducts.map((p) => ({
             id: p.id,
@@ -253,6 +251,8 @@ export const usePurchaseLoad = () => {
             {
                 text: 'Confirmar',
                 onPress: async () => {
+                    const selectedSupplierData = suppliersData.find((s) => s.id === selectedSupplier);
+
                     const purchaseData: PurchasePayload = {
                         warehouseId: selectedWarehouse,
                         author: user?.name || '',
@@ -263,6 +263,8 @@ export const usePurchaseLoad = () => {
                             quantity: p.quantity,
                             netPrice: parseFloat(p.netPrice || '0'),
                         })),
+                        supplierDocument: selectedSupplierData?.rut || '',
+                        supplierName: selectedSupplierData?.name || '',
                     };
 
                     const result = await dispatch(createPurchaseThunk(purchaseData));

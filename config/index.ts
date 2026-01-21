@@ -5,7 +5,7 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/constants';
 import { clearStorage, getItem, setItem } from '@/services/asyncStorage';
 
 const LOCAL_BASE_URL =
-    Platform.OS === 'android' ? 'http://192.168.1.84:4000' : 'https://api.grabify.cl/';
+    Platform.OS === 'android' ? 'https://api.grabify.cl/' : 'https://api.grabify.cl/';
 
 export const clientBackend = axios.create({
     baseURL: `${LOCAL_BASE_URL}`,

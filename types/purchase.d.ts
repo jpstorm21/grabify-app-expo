@@ -4,4 +4,6 @@ interface PurchasePayload {
     author: string;
     date: string;
     comment?: string;
+    supplierDocument: string;
+    supplierName: string;
 }
